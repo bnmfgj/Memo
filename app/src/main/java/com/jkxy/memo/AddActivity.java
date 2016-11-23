@@ -1,14 +1,19 @@
 package com.jkxy.memo;
 
+import android.content.ComponentName;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class AddActivity extends AppCompatActivity implements View.OnClickListener {
+public class AddActivity extends AppCompatActivity implements View.OnClickListener, ServiceConnection {
     private Db db;
     private EditText etTime, etDes;
 
@@ -50,5 +55,17 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
         findViewById(R.id.save).setOnClickListener(this);
         etDes = (EditText) findViewById(R.id.etDes);
         etTime = (EditText) findViewById(R.id.etTime);
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        Intent intent =new Intent(this, MyService.class);
+        intent.putExtra("time",etTime.getText());
+        bindService(intent, this, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+
     }
 }

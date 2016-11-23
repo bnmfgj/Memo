@@ -1,9 +1,14 @@
 package com.jkxy.memo;
 
+
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.IBinder;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -12,7 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
     private Db db;
     private SimpleCursorAdapter adapter;
     private ListView listView;
@@ -22,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+
         dataRefresh();
     }
 
@@ -29,9 +35,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnAdd:
-                Intent i = new Intent(this, AddActivity.class);
-                startActivityForResult(i, 1);
+                startActivity(new Intent(this, AddActivity.class));
                 break;
+            case R.id.btnTip:
+
         }
     }
 
@@ -44,14 +51,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void dataRefresh() {
         SQLiteDatabase dbRead = db.getReadableDatabase();
         Cursor c = dbRead.query("note", null, null, null, null, null, null);
-        adapter = new SimpleCursorAdapter(this, R.layout.layout_list, c, new String[]{"time", "description"}, new int[]{R.id.tvTime, R.id.tvDes});
+        adapter = new SimpleCursorAdapter(this, R.layout.layout_list, c, new String[]{"time", "description"}, new int[]{R.id.tvTime, R.id.tvDes}, 1);
         listView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-
     }
 
     public void initView() {
         findViewById(R.id.btnAdd).setOnClickListener(this);
+        findViewById(R.id.btnTip).setOnClickListener(this);
         listView = (ListView) findViewById(R.id.list);
         listView.setOnItemClickListener(this);
         db = new Db(this);
@@ -70,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     case 0:
                         Cursor c = adapter.getCursor();
                         c.moveToPosition(i);
-
                         int itemId = c.getInt(c.getColumnIndex("_id"));
                         SQLiteDatabase dbWrite = db.getWritableDatabase();
                         dbWrite.delete("note", "_id=?", new String[]{itemId + ""});
